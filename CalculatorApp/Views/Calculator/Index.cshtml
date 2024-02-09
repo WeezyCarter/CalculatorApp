@@ -1,0 +1,158 @@
+﻿@model CalculatorApp.Models.CalculatorModel
+
+@{
+    ViewBag.Title = "Calculator";
+}
+
+<style>
+    body {
+        color: white; /* Set text color to white */
+        background-color: black; /* Set background color to black */
+    }
+
+    .calculator-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .calculator-screen {
+        width: 200px; /* Adjust width as needed */
+        height: 50px; /* Adjust height as needed */
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 0 10px;
+        font-size: 24px; /* Adjust font size as needed */
+        color: white; /* Set text color to white */
+        background-color: black; /* Set background color to black */
+    }
+
+    .calculator-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 50px); /* Three columns for numbers */
+        grid-auto-rows: 50px; /* Fixed height for rows */
+        gap: 2px;
+        justify-content: center; /* Center the grid horizontally */
+        align-items: center; /* Center the grid vertically */
+    }
+
+    .btn {
+        width: 50px;
+        height: 50px;
+        text-align: center; /* Center text in buttons */
+        font-size: 18px; /* Adjust font size as needed */
+        color: white; /* Set text color to white */
+        background-color: black; /* Set background color to black */
+    }
+
+    .operator {
+        justify-self: end; /* Align operator buttons to the right */
+    }
+
+    .zero {
+        grid-column: span 3; /* Make the 0 button span three columns */
+        display: flex;
+        justify-content: center; /* Center the button horizontally */
+        align-items: center; /* Center the button vertically */
+        justify-self: center; /* Center the button horizontally within its grid cell */
+    }
+
+    .calculator-container-wrapper {
+        border: 2px solid white; /* Set border color to white */
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center; /* Center the calculator horizontally */
+        max-width: 300px; /* Adjust the maximum width as needed */
+        background-color: black; /* Set background color to black */
+        margin: 0 auto; /* Center the calculator horizontally */
+    }
+
+</style>
+<div class="calculator-container-wrapper">
+    <div class="calculator-container">
+        <div class="calculator-screen" id="display">@Model.Result</div>
+        <div class="calculator-buttons">
+            <!-- Number buttons -->
+            @for (int i = 9; i >= 1; i--)
+            {
+                <button type="button" class="btn" onclick="appendValue('@i')">@i</button>
+            }
+            <button type="button" class="btn zero" onclick="appendValue('0')">0</button>
+
+            <!-- Operation buttons -->
+            <button type="button" class="btn operator" onclick="appendValue('+')">+</button>
+            <button type="button" class="btn operator" onclick="appendValue('-')">-</button>
+            <button type="button" class="btn operator" onclick="appendValue('*')">*</button>
+            <button type="button" class="btn operator" onclick="appendValue('/')">/</button>
+
+            <!-- Clear and Equals buttons -->
+            <button type="button" class="btn" onclick="clearDisplay()">C</button>
+            <button type="submit" class="btn" onclick="calculateResult()">=</button>
+
+        </div>
+
+        <!-- Hidden fields to store actual values -->
+        @Html.HiddenFor(m => m.Number1)
+        @Html.HiddenFor(m => m.Number2)
+        @Html.HiddenFor(m => m.Operation)
+    </div>
+
+    @section Scripts {
+        <script>
+            function appendValue(value) {
+                var display = document.getElementById('display');
+                display.innerText += value;
+            }
+
+            function clearDisplay() {
+                var display = document.getElementById('display');
+                display.innerText = '';
+            }
+
+            function calculateResult() {
+                var display = document.getElementById('display');
+                var expression = display.innerText;
+
+                // Use regular expression to split the expression into numbers and operators
+                var elements = expression.match(/\d+|[\+\-\*\/]/g);
+
+                // Initialize variables for calculation
+                var result = parseFloat(elements[0]); // Initialize result with the first number
+                var operator = '';
+
+                // Iterate over the elements and perform the calculation
+                for (var i = 1; i < elements.length; i++) {
+                    if (isNaN(parseFloat(elements[i]))) {
+                        // If it's an operator, store it for later use
+                        operator = elements[i];
+                    } else {
+                        // If it's a number, perform the operation with the previous result and current number
+                        switch (operator) {
+                            case '+':
+                                result += parseFloat(elements[i]);
+                                break;
+                            case '-':
+                                result -= parseFloat(elements[i]);
+                                break;
+                            case '*':
+                                result *= parseFloat(elements[i]);
+                                break;
+                            case '/':
+                                result /= parseFloat(elements[i]);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+                // Update the display with the result
+                display.innerText = result;
+            }
+        </script>
+    }
+</div>
